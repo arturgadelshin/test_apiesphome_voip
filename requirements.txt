@@ -1,0 +1,5 @@
+aioesphomeapi>=17.0.0
+pyaudio>=0.2.11
+aiohttp>=3.8.0
+numpy>=1.21.0
+wave>=0.0.2

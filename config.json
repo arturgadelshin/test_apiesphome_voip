@@ -1,0 +1,23 @@
+{
+  "esphome": {
+    "host": "192.168.0.103",
+    "port": 6053,
+    "password": ""
+  },
+  "audio": {
+    "sample_rate": 16000,
+    "chunk_size": 512,
+    "device_index": null
+  },
+  "http": {
+    "host": "0.0.0.0",
+    "port": 8080
+  },
+  "ffmpeg": {
+    "compression_level": 0,
+    "buffer_size": 8192
+  },
+  "latency": {
+    "monitoring_window": 100
+  }
+}
