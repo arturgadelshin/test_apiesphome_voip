@@ -422,7 +422,7 @@ class ESPHomeVoiceAssistant:
 
 async def main():
     # Конфигурация
-    HOST = "192.168.0.109"  # IP устройства ESP32
+    HOST = "192.168.0.121"  # IP устройства ESP32
     PORT = 6053
     PASSWORD = ""
 

@@ -658,7 +658,7 @@ class ESP32AudioBridge:
 
 
 async def main():
-    HOST = "192.168.0.103"  # ← Замените на IP вашего ESP32
+    HOST = "192.168.0.121"  # ← Замените на IP вашего ESP32
     PORT = 6053
     PASSWORD = ""           # ← Если задан в ESPHome
 
