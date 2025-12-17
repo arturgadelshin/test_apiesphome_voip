@@ -5,7 +5,7 @@ async def main():
     """Connect to an ESPHome device and get details."""
 
     # Establish connection
-    api = aioesphomeapi.APIClient("192.168.0.103", 6053, "")
+    api = aioesphomeapi.APIClient("192.168.0.109", 6053, "")
     await api.connect(login=True)
 
     # Get API version of the device's firmware

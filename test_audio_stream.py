@@ -9,13 +9,13 @@ import time
 
 # logging.basicConfig(level=logging.DEBUG)
 
-ESP_HOST = "192.168.0.103"
+ESP_HOST = "192.168.0.109"
 ESP_PORT = 6053
 ESP_PASSWORD = ""
 
-LOCAL_FILE_PATH = "audio.flac"  # Файл в той же директории, что и скрипт
+LOCAL_FILE_PATH = "audio8.wav"  # Файл в той же директории, что и скрипт
 STREAM_PORT = 8989  # Порт для нашего локального стриминг-сервера
-STREAM_URL = f"http://192.168.0.106:{STREAM_PORT}/stream.flac" # URL, который будет слушать ESP32
+STREAM_URL = f"http://192.168.0.106:{STREAM_PORT}/stream.wav" # URL, который будет слушать ESP32
 
 # --- Код стриминг-сервера ---
 async def stream_handler(request):
@@ -24,7 +24,7 @@ async def stream_handler(request):
         status=200,
         reason='OK',
         headers={
-            'Content-Type': 'audio/flac',  # Указываем правильный MIME-тип
+            'Content-Type': 'audio/wav',  # Указываем правильный MIME-тип
             'Access-Control-Allow-Origin': '*',  # Политика CORS (опционально)
         }
     )
@@ -53,7 +53,7 @@ async def stream_handler(request):
 async def start_stream_server():
     """Запускает aiohttp-сервер для стриминга."""
     app = web.Application()
-    app.router.add_get('/stream.flac', stream_handler)
+    app.router.add_get('/stream.wav', stream_handler)
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', STREAM_PORT) # Слушаем на всех интерфейсах
@@ -83,7 +83,7 @@ async def play_audio_stream():
         entities, _ = await api_client.list_entities_services()
 
         for entity in entities:
-            if type(entity).__name__ == 'MediaPlayerInfo' and getattr(entity, 'object_id', None) == 'media_player':
+            if type(entity).__name__ == 'MediaPlayerInfo' and getattr(entity, 'object_id', None) == 'speaker_media_player':
                 media_player_key = entity.key
                 print(f"Найден медиаплеер: key={media_player_key}")
                 break

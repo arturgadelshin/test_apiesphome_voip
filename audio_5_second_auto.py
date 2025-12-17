@@ -5,6 +5,8 @@ from datetime import datetime
 import logging
 import os
 import json
+import numpy as np
+from scipy.signal import resample
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -181,16 +183,37 @@ class ESPHomeVoiceAssistant:
             logger.debug("⚠️ Пустой буфер, пропускаем сохранение")
 
     async def _save_audio_data(self, audio_data, filename):
-        """Сохранение аудио данных в WAV файл"""
+        """Сохранение аудио данных в WAV файл с ресемплингом до 8 кГц"""
         if not audio_data:
             return False
 
         try:
+            # Преобразуем байты в numpy массив (16-bit signed integers)
+            raw_audio = np.frombuffer(audio_data, dtype=np.int16)
+
+            # Текущая частота дискретизации (предполагается 16000 Гц)
+            original_rate = 16000
+            target_rate = 8000
+
+            # Вычисляем новую длину массива после ресемплинга
+            num_samples = int(len(raw_audio) * target_rate / original_rate)
+
+            # Ресемплинг
+            resampled_audio = resample(raw_audio, num_samples)
+
+            # Обрезаем до чётного числа семплов (если нужно для WAV)
+            if len(resampled_audio) % 2 != 0:
+                resampled_audio = resampled_audio[:-1]
+
+            # Преобразуем обратно в байты
+            resampled_bytes = resampled_audio.astype(np.int16).tobytes()
+
+            # Сохраняем в WAV файл с частотой 8 кГц
             with wave.open(filename, 'wb') as wav_file:
                 wav_file.setnchannels(1)  # моно
                 wav_file.setsampwidth(2)  # 16-bit
-                wav_file.setframerate(16000)  # 16 kHz
-                wav_file.writeframes(audio_data)
+                wav_file.setframerate(target_rate)  # 8 kHz
+                wav_file.writeframes(resampled_bytes)
             return True
         except Exception as e:
             logger.error(f"❌ Ошибка сохранения WAV файла {filename}: {e}")
@@ -224,7 +247,7 @@ class ESPHomeVoiceAssistant:
 
 async def main():
     # Конфигурация
-    HOST = "192.168.0.121"  # IP устройства ESP32
+    HOST = "192.168.0.103"  # IP устройства ESP32
     PORT = 6053
     PASSWORD = ""  # Оставьте пустым, если не установлен
 
@@ -247,6 +270,7 @@ async def main():
         print("\n🔧 НАСТРОЙКИ:")
         print(f"   • Длительность сегмента: {assistant.segment_duration} секунд")
         print(f"   • Папка для записей: {os.path.abspath(RECORDINGS_DIR)}")
+        print(f"   • Частота дискретизации: 8 кГц (после ресемплинга)")
         print("\n🎤 ИНСТРУКЦИЯ:")
         print("   1. Активируйте голосовой помощник на ESP32:")
         print("      - Скажите wake word (например, 'Alexa', 'Hey Google')")
@@ -255,6 +279,7 @@ async def main():
         print("      - Каждые 5 секунд будет сохраняться новый файл")
         print("      - Все файлы сохраняются в папке 'esp32_recordings'")
         print("      - Имена файлов содержат дату, время и номер сегмента")
+        print("      - Файлы сохраняются с частотой 8 кГц после ресемплинга")
         print("\n   3. Когда разговор завершится, запись остановится автоматически")
         print("\n   4. Для выхода нажмите Ctrl+C")
         print("=" * 60 + "\n")
